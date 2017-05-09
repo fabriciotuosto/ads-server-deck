@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>  Automate Facebook Ads  </title>
+		<meta name="description" content="  Automate Facebook Ads  ">
+		<meta name="author" content="Fabricio Tuosto">
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="stylesheet" href="./node_modules/reveal.js/css/reveal.css">
+		<link rel="stylesheet" href="./node_modules/reveal.js/css/theme/black.css" id="theme">
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? './node_modules/reval.js/css/print/pdf.css' : './node_modules/reveal.js/css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+    <style media="screen">
+      .reveal { font-size: 3em; }
+      .reveal p, .reveal h2 { text-align: left; }
+      .reveal p {
+        text-indent: -1em;
+        margin-left: 1em;
+      }
+      img{
+      	max-height: 560px !important;
+      }
+    </style>
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="./node_modules/reveal.js/lib/css/zenburn.css">
+		<!--[if lt IE 9]>
+		<script src="./node_modules/reveal.js/lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="reveal">
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section data-markdown>
+					<textarea data-template>
+						###### Automate Facebook Ads (HoyPido)
+					</textarea>
+				</section>
+
+				<section data-markdown>
+					<textarea data-template>
+## About Me
+- CTO of HoyPido
+- Been a programmer for +10 years
+- Worked on wide range of industries
+					</textarea>
+				</section>
+
+				<section data-markdown>
+					<textarea data-template>
+## About HoyPido
+- Food delivery service
+- Reduce offer to improve customer experience
+- Keep healthy diet by showing statistics and order a week ahead
+					</textarea>
+				</section>
+
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							## Where we started
+						</textarea>
+					</section>
+					<section>
+						<h3>Kitchens</h3>
+						<img data-src="./img_coverage.png" alt="Ad Example 1">
+					</section>
+					<section>
+						<h3>Ad Example</h3>
+						<img data-src="./img_old_ad_1.png" alt="Ad Example 1">
+					</section>
+					<section>
+						<h3>Ad Example</h3>
+						<img data-src="./img_old_ad_2.png" alt="Ad Example 2">
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+- Ad showed where there was no coverage
+- Ad showed dish that is not currently sold
+- Not showing current menu
+- Prone to forgetting to end ads
+- No taking inventory into account
+- Audience too broad
+- Too Expensive
+						</textarea>
+					</section>
+				</section>
+
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+### Solution
+- Create ad when a menu for a kitchen is created
+- Pause / Activate ad based on kitchen inventory
+- Replace creative when an item is sold out
+						</textarea>
+					</section>
+					<section>
+						<h2>Ad Example</h2>
+						<img data-src="./img_new_ad_1.gif" alt="Fuck">
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							### Now some code
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							### Creating Ad Campaign
+    form = {:form, [name: campaign.name,
+                    objective: campaign.objective,
+                    status: campaign.status,
+                    start_time: campaign.start_time,
+                    end_time: campaign.end_time,
+                    spend_cap: campaign.spend_cap,
+                    access_token: Facebook.access_token,
+                    appsecret_proof: Facebook.appsecret_proof
+    ]}
+    HTTPoison.post!("https://graph.facebook.com/v2.6/act_#{Facebook.ad_account}/campaigns", form, @form_header)
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+### Creating Ad Set
+	form = {:form, [name: adset.name,
+					daily_budget: adset.daily_budget,
+					campaign_id: adset.campaign.id,
+					is_autobid: adset.is_autobid,
+					billing_event: adset.billing_event,
+					start_time: adset.campaign.start_time,
+					end_time: adset.campaign.end_time,
+					lifetime_budget: adset.lifetime_budget,
+					pacing_type: Poison.encode!(adset.pacing_type),
+					promoted_object: Poison.encode!(adset.promoted_object),
+					targeting: Poison.encode!(adset.targeting),
+					access_token: Facebook.access_token,
+					appsecret_proof: Facebook.appsecret_proof
+	]}
+	HTTPoison.post!("https://graph.facebook.com/v2.6/act_#{Facebook.ad_account}/adsets", form, @form_header)
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							### Creating Ad Creative
+	form = {:form, [name: adcreative.name,
+					object_story_spec: Poison.encode!(adcreative.object_story_spec),
+					access_token: Facebook.access_token,
+					appsecret_proof: Facebook.appsecret_proof
+	]}
+	HTTPoison.post!("https://graph.facebook.com/v2.6/act_#{Facebook.ad_account}/adcreatives", form, @form_header, recv_timeout: 30_000)				
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+						### Creating Ad
+	form = {:form, [name: ad.name,
+					adset_id: ad.adset.id,
+					creative: Poison.encode!(%{creative_id: ad.creative.id}),
+					status: ad.status,
+					access_token: Facebook.access_token,
+					appsecret_proof: Facebook.appsecret_proof
+	]}
+	HTTPoison.post!("https://graph.facebook.com/v2.6/act_#{Facebook.ad_account}/ads", form, @form_header)
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+### Pausing Ad
+```
+	def update_status(id, status) do
+		form = {:form, [status: status,
+						access_token: Facebook.access_token,
+						appsecret_proof: Facebook.appsecret_proof
+		]}
+		HTTPoison.post!("https://graph.facebook.com/v2.6/#{id}", form, @form_header)
+		status
+	end
+```
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+### Results
+- Eliminate user complaints for ads that shown item not being sell
+- Reduce ad cost by 3x
+- CPC reduced by half 
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+### Issues
+- Need to be Marketing Partner to avoid Rate Limiter
+- Cannot modify ads on real time because of rate limiter
+						</textarea>
+					</section>
+				</section>
+
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+### Thank you
+
+###### Links
+- https://developers.facebook.com/docs/marketing-apis
+- https://developers.facebook.com/docs/marketing-api/reference/ad-creative
+						</textarea>
+					</section>
+				</section>
+			<!-- /.slides -->
+			</div>
+
+		<!-- /.reveal -->
+		</div>
+
+		<script src="./node_modules/reveal.js/lib/js/head.min.js"></script>
+		<script src="./node_modules/reveal.js/js/reveal.js"></script>
+		<script src="./node_modules/reveal.js/plugin/markdown/marked.js"></script>
+
+		<script>
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: false,
+				history: true,
+				center: true,
+				transition: 'linear', // default/cube/page/concave/zoom/linear/fade/none
+				transitionSpeed: 'fast',		
+				// // Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: './node_modules/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: './node_modules/reveal.js/plugin/markdown/markdown.js', async: true },
+					{ src: './node_modules/reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					// { src: './node_modules/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+				]
+			});
+		</script>
+
+	</body>
+</html>
